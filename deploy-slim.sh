@@ -83,7 +83,9 @@ mkdir -p data logs
 
 # 5. 啟動服務
 echo -e "${YELLOW}[5/5] 啟動 Docker 容器...${NC}"
-docker-compose up -d --build
+cd "$BACKEND_DIR"
+docker compose down 2>/dev/null || true
+docker compose up -d --build
 
 # 等待服務啟動
 echo "等待服務啟動..."
