@@ -13,6 +13,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
+      - CRAWLER_DATA_PATH=/app/course-data
     volumes:
       # Use named volume for data (better for permissions)
       - qaq-data:/app/data
