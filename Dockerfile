@@ -1,5 +1,9 @@
 # QAQ Backend Dockerfile
-# Multi-stage build for optimized production image
+# Multi-stage build for opt# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "dist/server.js"]d production image
 
 # Build stage
 FROM node:20-alpine AS builder
@@ -8,12 +12,16 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including devDependencies for TypeScript)
+RUN npm ci
 
 # Copy source code
-COPY . .
+COPY src ./src
+
+# Build TypeScript
+RUN npm run build
 
 # Production stage
 FROM node:20-alpine
@@ -27,12 +35,14 @@ RUN apk add --no-cache dumb-init
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copy dependencies from builder
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+# Install production dependencies only
+COPY package*.json ./
+RUN npm ci --only=production
 
-# Copy application files
-COPY --chown=nodejs:nodejs package*.json ./
-COPY --chown=nodejs:nodejs src ./src
+# Copy compiled JavaScript from builder
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+
+# Copy data directory
 COPY --chown=nodejs:nodejs data ./data
 
 # Switch to non-root user
