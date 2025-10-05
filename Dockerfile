@@ -37,8 +37,8 @@ RUN npm ci --only=production
 # Copy compiled JavaScript from builder
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 
-# Copy data directory
-COPY --chown=nodejs:nodejs data ./data
+# Create data directory with correct permissions
+RUN mkdir -p ./data && chown -R nodejs:nodejs ./data
 
 # Switch to non-root user
 USER nodejs
