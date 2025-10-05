@@ -14,10 +14,10 @@ services:
       - NODE_ENV=production
       - PORT=3001
     volumes:
-      # Mount data directory for persistence
-      - ./data:/app/data
-      # Mount logs directory
-      - ./logs:/app/logs
+      # Use named volume for data (better for permissions)
+      - qaq-data:/app/data
+      # Use named volume for logs
+      - qaq-logs:/app/logs
       # Mount course data directory (read-only)
       - ../course-data:/app/course-data:ro
     networks:
@@ -35,4 +35,6 @@ networks:
 
 volumes:
   qaq-data:
+    driver: local
+  qaq-logs:
     driver: local
