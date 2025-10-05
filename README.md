@@ -1,336 +1,299 @@
-# QAQ Backend API
+# QAQ Backend# QAQ Backend
 
-> Node.js + Express + TypeScript + **SQLite**  
-> **數據中轉站架構**: Flutter 上傳 → Backend 儲存 → Web 讀取  
-> ✅ 零配置資料庫 - 即開即用!
 
-## 🎯 設計理念
 
-### 架構說明
+**QAQ 北科生活** - 後端 API 服務**QAQ 北科生活** - 後端 API 服務
 
-```
+
+
+提供課程搜尋、空教室查詢、課表管理等功能的 RESTful API。提供課程搜尋、空教室查詢、課表管理等功能的 RESTful API。
+
+
+
+[![Node.js](https://img.shields.io/badge/node-20.x-green.svg)](https://nodejs.org/)[![Node.js](https://img.shields.io/badge/node-20.x-green.svg)](https://nodejs.org/)
+
+[![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org/)[![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org/)
+
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
+
+
+
+---## 🎯 設計理念
+
+
+
+## 🚀 快速部署### 架構說明
+
+
+
+### 前置要求```
+
 ┌─────────────┐
-│ Flutter App │ ──直接→ NTUT API ✅ 唯一爬蟲
-│ (主力)      │          ↓
-└──────┬──────┘     爬個人資料
+
+- Docker 和 Docker Compose│ Flutter App │ ──直接→ NTUT API ✅ 唯一爬蟲
+
+- Nginx│ (主力)      │          ↓
+
+- Git└──────┬──────┘     爬個人資料
+
        │              ↓
-       │         ┌─────────┐
+
+### 一鍵部署（複製貼上即可）       │         ┌─────────┐
+
        └────────→│ Backend │ ← Flutter 上傳
-                 │ SQLite  │
-                 └────┬────┘
-                      │
-                      ↓ Web 讀取
-                 ┌─────────┐
-                 │ Vue Web │ → 也可直接爬公開資料
-                 └─────────┘
-```
 
-### 核心原則
+```bash                 │ SQLite  │
 
-1. **Backend 不主動爬取** - 避免被 NTUT 當成自動化腳本
+# Clone 專案和課程數據                 └────┬────┘
+
+mkdir -p ~/qaq && cd ~/qaq && \                      │
+
+git clone https://github.com/changrun1/QAQ_backend.git backend && \                      ↓ Web 讀取
+
+git clone -b gh-pages https://github.com/gnehs/ntut-course-crawler-node.git course-data && \                 ┌─────────┐
+
+cd backend && \                 │ Vue Web │ → 也可直接爬公開資料
+
+cat > .env << 'EOF'                 └─────────┘
+
+PORT=3001```
+
+NODE_ENV=production
+
+COURSE_DATA_PATH=/app/course-data### 核心原則
+
+LOG_LEVEL=info
+
+EOF1. **Backend 不主動爬取** - 避免被 NTUT 當成自動化腳本
+
 2. **Flutter 是唯一爬蟲** - 移動端無 CORS 限制
-3. **Backend 只存 Flutter 上傳的資料** - 純數據中轉
-4. **Web 可爬公開資料** - 如課程查詢（ntut-course-web）
 
----
+# 啟動服務3. **Backend 只存 Flutter 上傳的資料** - 純數據中轉
 
-## 🚀 快速開始
+docker-compose up -d --build && \4. **Web 可爬公開資料** - 如課程查詢（ntut-course-web）
+
+sudo cp nginx-api-qaq.conf /etc/nginx/sites-available/api-qaq && \
+
+sudo ln -s /etc/nginx/sites-available/api-qaq /etc/nginx/sites-enabled/ && \---
+
+sudo nginx -t && sudo systemctl reload nginx && \
+
+echo "✅ 部署完成！測試: curl http://localhost:3001/api/health"## 🚀 快速開始
+
+```
 
 ### 1. 安裝依賴
 
+**就這樣！** 服務已啟動 🎉
+
 ```bash
-npm install
+
+### SSL 配置（可選）npm install
+
 ```
 
-### 2. 啟動開發伺服器
-
 ```bash
+
+sudo apt install certbot python3-certbot-nginx -y### 2. 啟動開發伺服器
+
+sudo certbot --nginx -d your-domain.com
+
+``````bash
+
 npm run dev
-```
 
-伺服器會啟動在 http://localhost:3001
+---```
 
-**SQLite 資料庫會自動建立在 `data/qaq.db`** ✨
 
-### 3. 測試 API
 
-使用提供的測試腳本:
+## 📁 專案結構伺服器會啟動在 http://localhost:3001
 
-```powershell
-.\test-api.ps1
-```
 
-或手動測試:
 
-```powershell
+```**SQLite 資料庫會自動建立在 `data/qaq.db`** ✨
+
+qaq_backend/
+
+├── src/                    # 源代碼### 3. 測試 API
+
+├── data/                   # SQLite 資料庫
+
+├── docker-compose.yml      # Docker 配置使用提供的測試腳本:
+
+├── Dockerfile             # Docker 鏡像
+
+├── nginx-api-qaq.conf     # Nginx 配置```powershell
+
+└── package.json           # 依賴管理.\test-api.ps1
+
+``````
+
+
+
+---或手動測試:
+
+
+
+## 🔧 本地開發```powershell
+
 # Health Check
-Invoke-RestMethod -Uri "http://localhost:3001/health"
 
-# 登入測試
-Invoke-RestMethod -Uri "http://localhost:3001/api/auth/login" `
+```bashInvoke-RestMethod -Uri "http://localhost:3001/health"
+
+npm install
+
+npm run dev# 登入測試
+
+```Invoke-RestMethod -Uri "http://localhost:3001/api/auth/login" `
+
   -Method POST `
-  -ContentType "application/json" `
+
+環境變數 `.env`:  -ContentType "application/json" `
+
   -Body '{"username":"你的學號","password":"你的密碼"}'
+
+```env```
+
+PORT=3001
+
+NODE_ENV=development---
+
+COURSE_DATA_PATH=../course-data
+
+LOG_LEVEL=debug## 📚 API 文檔
+
 ```
-
----
-
-## 📚 API 文檔
 
 ### 認證 API
 
+---
+
 #### 登入
-```http
+
+## 🐳 Docker 管理```http
+
 POST /api/auth/login
-Content-Type: application/json
 
-{
+```bashContent-Type: application/json
+
+# 啟動
+
+docker-compose up -d{
+
   "username": "113360134",
-  "password": "your_password"
-}
+
+# 查看日誌  "password": "your_password"
+
+docker-compose logs -f}
+
 ```
 
-**成功回應:**
+# 重啟
+
+docker-compose restart**成功回應:**
+
 ```json
-{
-  "success": true,
-  "sessionId": "aaaXXXXXXXXXXXXXXX",
+
+# 停止{
+
+docker-compose down  "success": true,
+
+```  "sessionId": "aaaXXXXXXXXXXXXXXX",
+
   "user": {
-    "studentId": "113360134",
+
+---    "studentId": "113360134",
+
     "name": "張三",
-    "email": "t113360134@ntut.edu.tw"
+
+## 🔄 更新部署    "email": "t113360134@ntut.edu.tw"
+
   },
-  "expiresAt": "2025-10-04T06:00:00.000Z"
+
+```bash  "expiresAt": "2025-10-04T06:00:00.000Z"
+
+cd ~/qaq/backend && \}
+
+git pull origin main && \```
+
+cd ~/qaq/course-data && \
+
+git pull origin gh-pages && \**失敗回應:**
+
+cd ~/qaq/backend && \```json
+
+docker-compose down && \{
+
+docker-compose up -d --build  "success": false,
+
+```  "error": "帳號或密碼錯誤"
+
 }
-```
 
-**失敗回應:**
-```json
-{
-  "success": false,
-  "error": "帳號或密碼錯誤"
-}
-```
+---```
 
-#### 登出
+
+
+## 📡 API 端點#### 登出
+
 ```http
-POST /api/auth/logout
+
+```POST /api/auth/logout
+
+GET  /api/health              # 健康檢查x-session-id: {sessionId}
+
+GET  /api/courses             # 課程搜尋```
+
+GET  /api/empty-classrooms    # 空教室查詢
+
+```#### 取得使用者資訊
+
+```http
+
+---GET /api/auth/me
+
 x-session-id: {sessionId}
-```
 
-#### 取得使用者資訊
+## 📝 依賴```
+
+
+
+課程數據來自 [gnehs/ntut-course-crawler-node](https://github.com/gnehs/ntut-course-crawler-node) (`gh-pages` 分支)---
+
+
+
+**必須將課程數據 clone 到 `../course-data` 目錄**### 數據同步 API (Flutter ↔ Backend)
+
+
+
+---#### Flutter 上傳數據
+
 ```http
-GET /api/auth/me
-x-session-id: {sessionId}
-```
 
----
+## 📦 技術棧POST /api/data/sync
 
-### 數據同步 API (Flutter ↔ Backend)
-
-#### Flutter 上傳數據
-```http
-POST /api/data/sync
 Content-Type: application/json
 
+Node.js 20 · Express 5 · TypeScript 5 · SQLite 3 · Docker · Nginx
+
 {
-  "studentId": "110590000",
+
+---  "studentId": "110590000",
+
   "profile": {
-    "name": "王小明",
+
+## 🤝 致謝    "name": "王小明",
+
     "email": "t110590000@ntut.edu.tw",
-    "department": "資訊工程系",
+
+- [gnehs/ntut-course-crawler-node](https://github.com/gnehs/ntut-course-crawler-node) - 課程數據來源    "department": "資訊工程系",
+
     "grade": 3
-  },
+
+---  },
+
   "courses": [
-    {
-      "courseId": "5901301",
-      "courseName": "資料結構",
-      "instructor": "張老師",
-      "location": "共同2F05",
-      "timeSlots": "二234",
-      "semester": "1131",
-      "credits": 3.0
-    }
-  ],
-  "grades": [
-    {
-      "courseId": "5901301",
-      "courseName": "資料結構",
-      "semester": "1131",
-      "credits": 3.0,
-      "grade": "A+",
-      "gradePoint": 4.3
-    }
-  ]
-}
-```
 
-**回應:**
-```json
-{
-  "success": true,
-  "studentId": "110590000",
-  "synced": {
-    "profile": true,
-    "courses": 8,
-    "grades": 15
-  },
-  "errors": []
-}
-```
+**MIT License** · 作者: [changrun1](https://github.com/changrun1) · 祝您使用愉快！ 🎉    {
 
-#### Web 讀取學生資料
-```http
-GET /api/data/110590000/profile
-GET /api/data/110590000/courses?semester=1131
-GET /api/data/110590000/grades?semester=1131
-GET /api/data/110590000/gpa
-GET /api/data/110590000/all
-```
-
----
-
-## 🏗️ 專案結構
-
-```
-qaq_backend/
-├── src/
-│   ├── server.ts               # Express 主程式
-│   ├── config/
-│   │   ├── database.ts         # SQLite 連接
-│   │   └── constants.ts        # 常數配置
-│   ├── routes/
-│   │   ├── auth.routes.ts      # (棄用) 認證路由
-│   │   └── data.routes.ts      # ✅ 數據同步路由
-│   ├── controllers/
-│   │   ├── auth.controller.ts  # (棄用) 認證控制器
-│   │   └── data.controller.ts  # ✅ 數據控制器
-│   ├── services/
-│   │   ├── ntut.service.ts     # (棄用) 北科 API 代理
-│   │   ├── auth.service.ts     # (棄用) 認證邏輯
-│   │   └── data.service.ts     # ✅ 數據同步邏輯
-│   ├── models/
-│   │   ├── User.ts             # (棄用) 使用者模型
-│   │   └── Data.ts             # ✅ 數據模型 (學生/課程/成績)
-│   └── middleware/
-│       ├── auth.middleware.ts  # 認證中介層
-│       └── error.middleware.ts # 錯誤處理
-├── data/
-│   └── qaq.db                  # SQLite 資料庫
-├── package.json
-├── tsconfig.json
-├── .env.example
-└── README.md
-```
-
----
-
-## 🧪 測試
-
-### 使用 PowerShell
-
-```powershell
-# 登入
-Invoke-RestMethod -Uri "http://localhost:3001/api/auth/login" `
-  -Method POST `
-  -ContentType "application/json" `
-  -Body '{"username":"你的學號","password":"你的密碼"}'
-
-# 取得使用者資訊
-Invoke-RestMethod -Uri "http://localhost:3001/api/auth/me" `
-  -Headers @{"x-session-id"="你的sessionId"}
-
-# Health Check
-Invoke-RestMethod -Uri "http://localhost:3001/health"
-```
-
-### 使用 curl
-
-```bash
-# 登入
-curl -X POST http://localhost:3001/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"你的學號","password":"你的密碼"}'
-
-# 取得使用者資訊
-curl http://localhost:3001/api/auth/me \
-  -H "x-session-id: 你的sessionId"
-```
-
----
-
-## 📦 NPM Scripts
-
-```bash
-npm run dev    # 啟動開發伺服器 (nodemon + ts-node)
-npm run build  # 編譯 TypeScript 到 dist/
-npm start      # 執行編譯後的程式 (生產環境)
-```
-
----
-
-## 🔑 環境變數
-
-| 變數 | 說明 | 預設值 |
-|------|------|--------|
-| `PORT` | 伺服器埠號 | 3001 |
-| `NODE_ENV` | 環境 | development |
-| `MONGODB_URI` | MongoDB 連接字串 | mongodb://localhost:27017/qaq |
-| `ALLOWED_ORIGINS` | CORS 允許的來源 | http://localhost:5173,http://localhost:3000 |
-| `SESSION_EXPIRES_IN_MINUTES` | Session 過期時間(分鐘) | 30 |
-
----
-
-## 🛠️ 技術棧
-
-- **Runtime**: Node.js 20+
-- **Framework**: Express 5
-- **Language**: TypeScript 5
-- **Database**: MongoDB (Mongoose)
-- **HTTP Client**: Axios
-- **Security**: Helmet, CORS
-
----
-
-## 📝 參考文檔
-
-- **FLUTTER_HANDOVER.md** - TAT 技術細節
-- **DEVELOPMENT_PLAN.md** - 完整開發規劃
-- **FINAL_TECH_DECISION.md** - 技術選型決策
-
----
-
-## 🔒 安全性
-
-- ✅ Session 自動過期 (30分鐘)
-- ✅ MongoDB TTL Index (自動刪除過期資料)
-- ✅ Helmet (安全性 headers)
-- ✅ CORS 白名單
-- ✅ 環境變數保護敏感資訊
-
----
-
-## ⚠️ 注意事項
-
-### 關鍵技術細節 (來自 FLUTTER_HANDOVER.md)
-
-1. **User-Agent**: 必須使用 `"Direk ios App"`
-2. **參數名稱**: `muid` 和 `mpassword` (不是 username/password)
-3. **Content-Type**: `application/x-www-form-urlencoded`
-4. **Session 管理**: JSESSIONID 有效期約 30 分鐘
-
----
-
-## 🚧 下一步
-
-- [ ] 實作成績 API (OAuth2 流程)
-- [ ] 實作課程 API (HTML 解析)
-- [ ] 整合 Redis 快取
-- [ ] 建立 Vue 3 前端
-- [ ] 整合 Flutter App
-
----
-
-**開發完成! 🎉**
-
-現在可以啟動伺服器測試登入功能了!
+ 
