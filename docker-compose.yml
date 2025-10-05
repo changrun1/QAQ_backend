@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # QAQ Backend API
+  qaq-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qaq-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Mount course data directory (read-only)
+      - ../course-data:/app/course-data:ro
+    networks:
+      - qaq-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  qaq-network:
+    driver: bridge
+
+volumes:
+  qaq-data:
+    driver: local

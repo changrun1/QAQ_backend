@@ -1,0 +1,47 @@
+# Dockerignore file for QAQ Backend
+# Prevent unnecessary files from being copied to Docker image
+
+# Node modules (will be installed in container)
+node_modules/
+npm-debug.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test files
+test/
+*.test.js
+coverage/
+
+# Development files
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build files
+dist/
+build/
+
+# PowerShell scripts
+*.ps1

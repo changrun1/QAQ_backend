@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+# 保留 package-lock.json 以確保依賴版本一致
+# package-lock.json
+
+# Build
+dist/
+*.js
+*.js.map
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite Database
+data/*.db
+data/*.db-shm
+data/*.db-wal
+# 但保留 data 目錄
+!data/.gitkeep
+
+# Test scripts
+test-*.ps1
